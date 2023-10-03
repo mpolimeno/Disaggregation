@@ -3,9 +3,9 @@ close all
 clear
 clc
 
-method = 2;
+method = 1;
 if method==1
-    SEED = 37;
+    SEED = 23;
     NC = 50;
     xc = DLA_3D(NC,SEED);
 elseif method==2
@@ -27,6 +27,8 @@ else
 end
 
 % unshifted routine
+% the idea of the base cube at the origin creates issues when it comes to
+% the dumbell, at least in term of face location for plotting purposes
 [finalposint, finalndir, finalori,Nf] = build_faces(xc,NC);
 
 [center_of_faces, normal_direction, orientation] = BuildBaseCube(finalposint,...
@@ -123,7 +125,14 @@ end
     internal_faces_complete,...
     internal_faces_unrepeated);
 
-PlotInternalStresses(xc, internal_and_external_stresses, NC,3,finalposint,external_faces,cubes_that_break);
+PlotInternalStresses(xc,...
+                     internal_and_external_stresses,...
+                     NC,...
+                     3,...
+                     finalposint,...
+                     external_faces,...
+                     cubes_that_break,...
+                     face_detached);
 
 [finalposint_1, finalndir_1, finalori_1,Nf_1] = build_faces(xc_1, size(xc_1,1));
 plot_faces(finalposint_1, finalndir_1, finalori_1,Nf_1,6,'b');
