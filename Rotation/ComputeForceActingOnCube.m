@@ -26,7 +26,7 @@ function force_acting_on_cube = ComputeForceActingOnCube(xc,drag,torque,flow)
     else
         for cube_index=1:NC
             x_vec = (xc_shift(cube_index,:));
-            force_acting_on_cube(cube_index,:) = cross(torque',x_vec_list(cube_index,:))/(norm(x_vec))^2;
+            force_acting_on_cube(cube_index,:) = cross(torque',x_vec)/(norm(x_vec))^2;
         end
     end
 end
