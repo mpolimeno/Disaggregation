@@ -54,7 +54,7 @@ function [internal_and_external_stresses,...
                 for kk=1:6 % go over everyface
                     Cmat(inde-3+jj,indu+3*(kk-1)+jj) = 1;
                 end
-                dRHS(inde-2:inde) = force_cube(i,:);
+                dRHS(inde-2:inde) = force_cube(i,:)/4; % 4 is the area of a square face
             end
         end
         % now add matching equation for each face
