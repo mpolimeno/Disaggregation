@@ -1,4 +1,4 @@
-function force_acting_on_cube = ComputeForceActingOnCube(xc,U_vec,Omega_vec,drag,torque,flow)
+function force_acting_on_cube = ComputeForceActingOnCube(xc,drag,torque,flow)
     
     % The scaling argument about the velocity and the force/torque does not seem to be what we want
     % Here is the proposed new implementation

@@ -107,7 +107,7 @@ for nc=1:length(NC_vec)
                                                                                flow);
 
     % Compute the force acting on cube to be able to compute internal stresses
-    force_acting_on_cube = ComputeForceActingOnCube(xc,U_vec,Omega_vec,drag_in,torque_in,flow);
+    force_acting_on_cube = ComputeForceActingOnCube(xc,drag_in,torque_in,flow);
 
     % Get index of internal faces
     internal_faces = FindInternalFaces(xc,NC);
