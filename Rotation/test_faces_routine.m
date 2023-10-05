@@ -3,10 +3,10 @@ close all
 clear
 clc
 
-method = 1;
+method = 2;
 if method==1
     SEED = 23;
-    NC = 50;
+    NC = 10;
     xc = DLA_3D(NC,SEED);
 elseif method==2
     NC_dumb = 4;
@@ -102,7 +102,7 @@ xc_shift = xc - cm; % shift for stresses
 %[internal_and_external_stresses,internal_stresses,indices_of_internal_stresses,internal_faces_and_cubes_index_array,internal_faces_and_cubes_index_array_no_double_counting] = ComputeInternalStresses(xc,NC,stress_outer,U_vec,Omega_vec,drag_in);
 
 % get the force acting on each cube
-force_cube = ComputeForceActingOnCube(xc,drag_in,torque_in,flow);
+force_cube = ComputeForceActingOnCube(xc,drag_in,flow);
 faces_of_base_cube = center_of_faces(1:6,:);
 [internal_and_external_stresses,...
     internal_stresses,...

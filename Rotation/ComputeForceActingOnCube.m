@@ -1,4 +1,4 @@
-function force_acting_on_cube = ComputeForceActingOnCube(xc,drag,torque,flow)
+function force_acting_on_cube = ComputeForceActingOnCube(xc,drag,flow)
     
     % The scaling argument about the velocity and the force/torque does not seem to be what we want
     % Here is the proposed new implementation
@@ -17,20 +17,11 @@ function force_acting_on_cube = ComputeForceActingOnCube(xc,drag,torque,flow)
     % If I am returning a zero force on each cube, this first condition is actually not necessary.
     % You can even say that even calling the function in the first place is not necessary, but should probably be done for logic consistency
     force_acting_on_cube = zeros(NC,3);
-    if flow==3 || flow==4
+    if flow==2 || flow==3 || flow==4
         force_acting_on_cube = zeros(NC,3);
-    elseif flow==1
-        for cube_index=1:NC
-            force_acting_on_cube(cube_index,:) = drag'/NC;
-        end
     else
         for cube_index=1:NC
-            x_vec = (xc_shift(cube_index,:));
-            if norm(x_vec)>0
-                force_acting_on_cube(cube_index,:) = cross(torque',x_vec)/(norm(x_vec))^2;
-            else
-                force_acting_on_cube(cube_index,:) = cross(torque',x_vec);
-            end
+            force_acting_on_cube(cube_index,:) = drag'/NC;
         end
     end
 end
