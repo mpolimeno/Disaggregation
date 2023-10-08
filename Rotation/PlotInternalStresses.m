@@ -1,11 +1,8 @@
-function PlotInternalStresses(center_of_cubes,...
-                              internal_and_external_stresses,...
-                              total_number_of_cubes,...
-                              figure_number,...
+function PlotInternalStresses(figure_number,...
                               center_of_external_faces,...
-                              total_number_of_external_faces,...
-                              cubes_that_break,...
-                              face_detached)
+                              finalndir,...
+                              stress_and_faces,...
+                              input_array)
                         
     
     %{
@@ -24,379 +21,75 @@ function PlotInternalStresses(center_of_cubes,...
     ylabel("y")
     zlabel("z")
     
-    number_of_faces_in_a_single_cube = 6;
-    norm_of_all_forces = zeros(number_of_faces_in_a_single_cube*total_number_of_cubes,1);
-    for i=1:(number_of_faces_in_a_single_cube*total_number_of_cubes)
-        norm_of_all_forces(i) = norm(internal_and_external_stresses(:,i));
+    % colorbar
+    c = parula(size(stress_and_faces,1));
+    my_colormap = [c stress_and_faces(:,2)];
+
+    center_of_internal_faces = input_array(:,1:3);
+    finalndir_internal = input_array(:,4);
+    
+    total_number_of_external_faces = size(center_of_external_faces,1);
+    total_number_of_internal_faces = size(center_of_internal_faces,1);
+    % let us take care of the external faces first
+    for external=1:total_number_of_external_faces
+        if (finalndir(external) == 1)
+            x_vertices_of_face_s = [center_of_external_faces(external,1) center_of_external_faces(external,1) center_of_external_faces(external,1) center_of_external_faces(external,1) ];
+            y_vertices_of_face_s = [center_of_external_faces(external,2)+1 center_of_external_faces(external,2)+1 center_of_external_faces(external,2)-1 center_of_external_faces(external,2)-1 ];
+            z_vertices_of_face_s = [center_of_external_faces(external,3)+1 center_of_external_faces(external,3)-1 center_of_external_faces(external,3)-1 center_of_external_faces(external,3)+1 ];
+            hold on
+        end
+        if (finalndir(external) == 2)
+            x_vertices_of_face_s = [center_of_external_faces(external,1)+1 center_of_external_faces(external,1)+1 center_of_external_faces(external,1)-1 center_of_external_faces(external,1)-1 ];
+            y_vertices_of_face_s = [center_of_external_faces(external,2) center_of_external_faces(external,2) center_of_external_faces(external,2) center_of_external_faces(external,2) ];
+            z_vertices_of_face_s = [center_of_external_faces(external,3)+1 center_of_external_faces(external,3)-1 center_of_external_faces(external,3)-1 center_of_external_faces(external,3)+1 ];
+            hold on
+        end
+        if (finalndir(external) == 3)
+            x_vertices_of_face_s = [center_of_external_faces(external,1)+1 center_of_external_faces(external,1)-1 center_of_external_faces(external,1)-1 center_of_external_faces(external,1)+1 ];
+            y_vertices_of_face_s = [center_of_external_faces(external,2)+1 center_of_external_faces(external,2)+1 center_of_external_faces(external,2)-1 center_of_external_faces(external,2)-1 ];
+            z_vertices_of_face_s = [center_of_external_faces(external,3) center_of_external_faces(external,3) center_of_external_faces(external,3) center_of_external_faces(external,3) ];
+            hold on
+        end
+        patch(x_vertices_of_face_s,...
+              y_vertices_of_face_s,...
+              z_vertices_of_face_s,...
+              [1 1 1],...
+              'FaceAlpha',0)
     end
+    
+    hold on
 
-    max_stress = max(norm_of_all_forces);
-    min_stress = min(norm_of_all_forces);
-
-    range_of_stresses = max_stress-min_stress;
-
-    max_value_of_stress = 0;
-    internal_face_count = 0;
-    for i=1:total_number_of_cubes
-
-        % face 1
-        center_of_face        = [center_of_cubes(i,1)+1 center_of_cubes(i,2) center_of_cubes(i,3)]; % face center
-        x_vertices_of_face_s  = [center_of_cubes(i,1)+1 center_of_cubes(i,1)+1 center_of_cubes(i,1)+1 center_of_cubes(i,1)+1];
-        y_vertices_of_face_s  = [center_of_cubes(i,2)+1 center_of_cubes(i,2)+1 center_of_cubes(i,2)-1 center_of_cubes(i,2)-1];
-        z_vertices_of_face_s  = [center_of_cubes(i,3)+1 center_of_cubes(i,3)-1 center_of_cubes(i,3)-1 center_of_cubes(i,3)+1];
-        stress_on_face = (norm(internal_and_external_stresses(:,6*(i-1)+1))-min_stress)/range_of_stresses;
-        if (stress_on_face > max_value_of_stress)
-            max_value_of_stress = stress_on_face;
+    for internal=1:total_number_of_internal_faces
+        if (finalndir_internal(internal) == 1)
+            x_vertices_of_face_s = [center_of_internal_faces(internal,1) center_of_internal_faces(internal,1) center_of_internal_faces(internal,1) center_of_internal_faces(internal,1) ];
+            y_vertices_of_face_s = [center_of_internal_faces(internal,2)+1 center_of_internal_faces(internal,2)+1 center_of_internal_faces(internal,2)-1 center_of_internal_faces(internal,2)-1 ];
+            z_vertices_of_face_s = [center_of_internal_faces(internal,3)+1 center_of_internal_faces(internal,3)-1 center_of_internal_faces(internal,3)-1 center_of_internal_faces(internal,3)+1 ];
+            hold on
         end
-        this_is_an_internal_face = true; % assume we are inside
-        for j=1:total_number_of_external_faces
-            if (center_of_face==center_of_external_faces(j,:)) % we are on the outside
-                this_is_an_internal_face = false;
-            end 
-            if (this_is_an_internal_face==false)
-                patch(x_vertices_of_face_s,...
-                      y_vertices_of_face_s,...
-                      z_vertices_of_face_s,...
-                      [1 1 1],...
-                      'FaceAlpha',0)
-            end
+        if (finalndir_internal(internal) == 2)
+            x_vertices_of_face_s = [center_of_internal_faces(internal,1)+1 center_of_internal_faces(internal,1)+1 center_of_internal_faces(internal,1)-1 center_of_internal_faces(internal,1)-1 ];
+            y_vertices_of_face_s = [center_of_internal_faces(internal,2) center_of_internal_faces(internal,2) center_of_internal_faces(internal,2) center_of_internal_faces(internal,2) ];
+            z_vertices_of_face_s = [center_of_internal_faces(internal,3)+1 center_of_internal_faces(internal,3)-1 center_of_internal_faces(internal,3)-1 center_of_internal_faces(internal,3)+1 ];
+            hold on
         end
-        if (this_is_an_internal_face==true)
-            internal_face_count = internal_face_count+1;
-            if i==cubes_that_break(2) && internal_face_count==face_detached
-                  patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1 0 0])
-            else
-                patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1-stress_on_face 1-stress_on_face 1])
-            end
-            %cube_where_max_stress_is_located = i;
-            face_where_max_stress_is_located = 1;
+        if (finalndir_internal(internal) == 3)
+            x_vertices_of_face_s = [center_of_internal_faces(internal,1)+1 center_of_internal_faces(internal,1)-1 center_of_internal_faces(internal,1)-1 center_of_internal_faces(internal,1)+1 ];
+            y_vertices_of_face_s = [center_of_internal_faces(internal,2)+1 center_of_internal_faces(internal,2)+1 center_of_internal_faces(internal,2)-1 center_of_internal_faces(internal,2)-1 ];
+            z_vertices_of_face_s = [center_of_internal_faces(internal,3) center_of_internal_faces(internal,3) center_of_internal_faces(internal,3) center_of_internal_faces(internal,3) ];
+            hold on
         end
-
-        % face 2
-        center_of_face        = [center_of_cubes(i,1) center_of_cubes(i,2)+1 center_of_cubes(i,3)]; % face center
-        x_vertices_of_face_s  = [center_of_cubes(i,1)+1 center_of_cubes(i,1)+1 center_of_cubes(i,1)-1 center_of_cubes(i,1)-1];
-        y_vertices_of_face_s  = [center_of_cubes(i,2)+1 center_of_cubes(i,2)+1 center_of_cubes(i,2)+1 center_of_cubes(i,2)+1];
-        z_vertices_of_face_s  = [center_of_cubes(i,3)+1 center_of_cubes(i,3)-1 center_of_cubes(i,3)-1 center_of_cubes(i,3)+1];
-        stress_on_face = (norm(internal_and_external_stresses(:,6*(i-1)+2))-min_stress)/range_of_stresses;
-        if (stress_on_face > max_value_of_stress)
-            max_value_of_stress = stress_on_face;
-        end
-        this_is_an_internal_face = true; % assume we are inside
-        for j=1:total_number_of_external_faces
-            if (center_of_face==center_of_external_faces(j,:)) % we are on the outside
-                this_is_an_internal_face = false;
-            end  
-            if (this_is_an_internal_face==false)
-                patch(x_vertices_of_face_s,...
-                      y_vertices_of_face_s,...
-                      z_vertices_of_face_s,...
-                      [1 1 1],...
-                      'FaceAlpha',0)
-            end
-        end
-        if (this_is_an_internal_face==true)
-            internal_face_count = internal_face_count+1;
-            if i==cubes_that_break(2) && internal_face_count==face_detached
-                  patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1 0 0])
-            else
-                patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1-stress_on_face 1-stress_on_face 1])
-            end
-            %cube_where_max_stress_is_located = i;
-            face_where_max_stress_is_located = 2;
-        end
-
-        % face 3
-        center_of_face        = [center_of_cubes(i,1) center_of_cubes(i,2) center_of_cubes(i,3)+1]; % face center
-        x_vertices_of_face_s  = [center_of_cubes(i,1)+1 center_of_cubes(i,1)-1 center_of_cubes(i,1)-1 center_of_cubes(i,1)+1];
-        y_vertices_of_face_s  = [center_of_cubes(i,2)+1 center_of_cubes(i,2)+1 center_of_cubes(i,2)-1 center_of_cubes(i,2)-1];
-        z_vertices_of_face_s  = [center_of_cubes(i,3)+1 center_of_cubes(i,3)+1 center_of_cubes(i,3)+1 center_of_cubes(i,3)+1];
-        stress_on_face = (norm(internal_and_external_stresses(:,6*(i-1)+3))-min_stress)/range_of_stresses;
-        if (stress_on_face > max_value_of_stress)
-            max_value_of_stress = stress_on_face;
-        end
-        this_is_an_internal_face = true; % assume we are inside
-        for j=1:total_number_of_external_faces
-            if (center_of_face==center_of_external_faces(j,:)) % we are on the outside
-                this_is_an_internal_face = false;
-            end
-            if (this_is_an_internal_face==false)
-                patch(x_vertices_of_face_s,...
-                      y_vertices_of_face_s,...
-                      z_vertices_of_face_s,...
-                      [1 1 1],...
-                      'FaceAlpha',0)
-            end
-        end
-        if this_is_an_internal_face==true
-            internal_face_count = internal_face_count+1;
-            if i==cubes_that_break(2) && internal_face_count==face_detached
-                  patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1 0 0])
-            else
-                patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1-stress_on_face 1-stress_on_face 1])
-            end
-            %cube_where_max_stress_is_located = i;
-            face_where_max_stress_is_located = 3;
-        end
-
-        % face 4
-        center_of_face        = [center_of_cubes(i,1) center_of_cubes(i,2) center_of_cubes(i,3)-1]; % face center
-        x_vertices_of_face_s  = [center_of_cubes(i,1)+1 center_of_cubes(i,1)-1 center_of_cubes(i,1)-1 center_of_cubes(i,1)+1];
-        y_vertices_of_face_s  = [center_of_cubes(i,2)+1 center_of_cubes(i,2)+1 center_of_cubes(i,2)-1 center_of_cubes(i,2)-1];
-        z_vertices_of_face_s  = [center_of_cubes(i,3)-1 center_of_cubes(i,3)-1 center_of_cubes(i,3)-1 center_of_cubes(i,3)-1];
-        stress_on_face = (norm(internal_and_external_stresses(:,6*(i-1)+4))-min_stress)/range_of_stresses;
-        if (stress_on_face > max_value_of_stress)
-            max_value_of_stress = stress_on_face;
-        end
-        this_is_an_internal_face = true; % assume we are inside
-        for j=1:total_number_of_external_faces
-            if (center_of_face==center_of_external_faces(j,:)) % we are on the outside
-                this_is_an_internal_face = false;
-            end
-            if (this_is_an_internal_face==false)
-                patch(x_vertices_of_face_s,...
-                      y_vertices_of_face_s,...
-                      z_vertices_of_face_s,...
-                      [1 1 1],...
-                      'FaceAlpha',0)
-            end
-        end
-        if this_is_an_internal_face==true
-            internal_face_count = internal_face_count+1;
-            if i==cubes_that_break(2) && internal_face_count==face_detached
-                  patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1 0 0])
-            else
-                patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1-stress_on_face 1-stress_on_face 1])
-            end
-            %cube_where_max_stress_is_located = i;
-            face_where_max_stress_is_located = 4;
-        end
-
-        % face 5
-        center_of_face        = [center_of_cubes(i,1) center_of_cubes(i,2)-1 center_of_cubes(i,3)]; % face center
-        x_vertices_of_face_s  = [center_of_cubes(i,1)+1 center_of_cubes(i,1)+1 center_of_cubes(i,1)-1 center_of_cubes(i,1)-1];
-        y_vertices_of_face_s  = [center_of_cubes(i,2)-1 center_of_cubes(i,2)-1 center_of_cubes(i,2)-1 center_of_cubes(i,2)-1];
-        z_vertices_of_face_s  = [center_of_cubes(i,3)+1 center_of_cubes(i,3)-1 center_of_cubes(i,3)-1 center_of_cubes(i,3)+1];
-        stress_on_face = (norm(internal_and_external_stresses(:,6*(i-1)+5))-min_stress)/range_of_stresses;
-        if (stress_on_face > max_value_of_stress)
-            max_value_of_stress = stress_on_face;
-        end
-        this_is_an_internal_face = true; % assume we are inside
-        for j=1:total_number_of_external_faces
-            if (center_of_face==center_of_external_faces(j,:)) % we are on the outside
-                this_is_an_internal_face = false;
-            end
-            if (this_is_an_internal_face==false)
-                patch(x_vertices_of_face_s,...
-                      y_vertices_of_face_s,...
-                      z_vertices_of_face_s,...
-                      [1 1 1],...
-                      'FaceAlpha',0)
-            end
-        end
-        if this_is_an_internal_face==true
-            internal_face_count = internal_face_count+1;
-            if i==cubes_that_break(2) && internal_face_count==face_detached
-                  patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1 0 0])
-            else
-                patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1-stress_on_face 1-stress_on_face 1])
-            end
-            %cube_where_max_stress_is_located = i;
-            face_where_max_stress_is_located = 5;
-        end
-
-        % face 6
-        center_of_face        = [center_of_cubes(i,1)-1 center_of_cubes(i,2) center_of_cubes(i,3)]; % face center
-        x_vertices_of_face_s  = [center_of_cubes(i,1)-1 center_of_cubes(i,1)-1 center_of_cubes(i,1)-1 center_of_cubes(i,1)-1];
-        y_vertices_of_face_s  = [center_of_cubes(i,2)+1 center_of_cubes(i,2)+1 center_of_cubes(i,2)-1 center_of_cubes(i,2)-1];
-        z_vertices_of_face_s  = [center_of_cubes(i,3)+1 center_of_cubes(i,3)-1 center_of_cubes(i,3)-1 center_of_cubes(i,3)+1];
-        stress_on_face = (norm(internal_and_external_stresses(:,6*(i-1)+6))-min_stress)/range_of_stresses;
-        if (stress_on_face > max_value_of_stress)
-            max_value_of_stress = stress_on_face;
-        end
-        this_is_an_internal_face = true; % assume we are inside
-        for j=1:total_number_of_external_faces
-            if (center_of_face==center_of_external_faces(j,:)) % we are on the outside
-                this_is_an_internal_face = false;
-            end
-            if (this_is_an_internal_face==false)
-                patch(x_vertices_of_face_s,...
-                      y_vertices_of_face_s,...
-                      z_vertices_of_face_s,...
-                      [1 1 1],...
-                      'FaceAlpha',0)
-            end
-        end
-        if this_is_an_internal_face==true
-            internal_face_count = internal_face_count+1;
-            if i==cubes_that_break(2) && internal_face_count==face_detached
-                  patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1 0 0])
-            else
-                patch(x_vertices_of_face_s,...
-                  y_vertices_of_face_s,...
-                  z_vertices_of_face_s,...
-                  [1-stress_on_face 1-stress_on_face 1])
-            end
-            %cube_where_max_stress_is_located = i;
-            face_where_max_stress_is_located = 6;
-        end
-
+        face_index = stress_and_faces(internal,2);
+        what_color = find(my_colormap(:,4)==face_index);
+        patch(x_vertices_of_face_s,...
+              y_vertices_of_face_s,...
+              z_vertices_of_face_s,...
+              [my_colormap(what_color,1)...
+               my_colormap(what_color,2)...
+               my_colormap(what_color,3)])
     end
-
-%     % Max stress will be on a red face
-%     face_where_max_stress_is_located
-%     if (face_where_max_stress_is_located==1)
-%         cube_where_max_stress_is_located = cubes_that_break(1);
-%         x_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1];
-%                             
-%         y_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1];
-%                             
-%         z_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1];
-%                             
-%         patch(x_vertices_of_face_s,y_vertices_of_face_s,z_vertices_of_face_s,[1 0 0]) % this is red
-%     end
-%     
-%     if (face_where_max_stress_is_located==2)
-%         cube_where_max_stress_is_located = cubes_that_break(1);
-%         x_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1];
-%                             
-%         y_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1];
-%                             
-%         z_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1];
-%                             
-%         patch(x_vertices_of_face_s,y_vertices_of_face_s,z_vertices_of_face_s,[1 0 0]) % this is red
-%     end
-%     
-%     if (face_where_max_stress_is_located==3)
-%         cube_where_max_stress_is_located = cubes_that_break(1);
-%         x_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1];
-%                             
-%         y_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1];
-%                             
-%         z_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1];
-%                             
-%         patch(x_vertices_of_face_s,y_vertices_of_face_s,z_vertices_of_face_s,[1 0 0]) % this is red
-%     end
-%     
-%     if (face_where_max_stress_is_located==4)
-%         cube_where_max_stress_is_located = cubes_that_break(1);
-%         x_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1];
-%                             
-%         y_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1];
-%                             
-%         z_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1];
-%                             
-%         patch(x_vertices_of_face_s,y_vertices_of_face_s,z_vertices_of_face_s,[1 0 0]) % this is red
-%     end
-%     
-%     if (face_where_max_stress_is_located==5)
-%         cube_where_max_stress_is_located = cubes_that_break(1);
-%         x_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1];
-%                             
-%         y_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1];
-%                             
-%         z_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1];
-%                             
-%         patch(x_vertices_of_face_s,y_vertices_of_face_s,z_vertices_of_face_s,[1 0 0]) % this is red
-%     end
-%     
-%     if (face_where_max_stress_is_located==6)
-%         cube_where_max_stress_is_located = cubes_that_break(1);
-%         x_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,1)-1];
-%                             
-%         y_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,2)-1];
-%                             
-%         z_vertices_of_face_s = [center_of_cubes(cube_where_max_stress_is_located,3)+1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)-1,...
-%                                 center_of_cubes(cube_where_max_stress_is_located,3)+1];
-%                             
-%         patch(x_vertices_of_face_s,y_vertices_of_face_s,z_vertices_of_face_s,[1 0 0]) % this is red
-%     end
-
     axis equal
+    az = 121;
+    el = 31;
+    view(az,el)
+    colorbar
 end
-

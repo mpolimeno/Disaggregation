@@ -10,7 +10,7 @@ function  [cubes_that_break,where] = GetCubesWhoseFaceDetaches(face_detached,...
 
     % Sort third column based on second column to feed columns to Graph (which sorts automatically)
     % This avoids indexing issues
-    internal_faces_and_cubes_index_array_no_double_counting = sortrows(internal_faces_and_cubes_index_array_no_double_counting,[2 3])
+    internal_faces_and_cubes_index_array_no_double_counting = sortrows(internal_faces_and_cubes_index_array_no_double_counting,[2 3]);
     % get index of which cubes break in the unrepeated array
     for ii=1:length(internal_faces_and_cubes_index_array_no_double_counting)
         internal_faces_and_cubes_index_array_no_double_counting(ii,2:3)
