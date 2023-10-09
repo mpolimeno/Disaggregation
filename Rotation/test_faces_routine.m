@@ -6,7 +6,7 @@ clc
 method = 1;
 if method==1
     SEED = 1;
-    NC = 100;
+    NC = 10;
     xc = DLA_3D(NC,SEED);
 elseif method==2
     NC_dumb = 4;
@@ -33,7 +33,7 @@ end
                                                             finalndir,...
                                                             finalori);
 
-plot_faces(finalposint, finalndir, finalori,Nf,1,'c');
+plot_faces(finalposint,finalndir,Nf,1,'c');
 
 % impose flow
 flow = 2;
@@ -136,9 +136,9 @@ PlotInternalStresses(3,...
                      input_array)
 
 [finalposint_1, finalndir_1, finalori_1,Nf_1] = build_faces(xc_1, size(xc_1,1));
-plot_faces(finalposint_1, finalndir_1, finalori_1,Nf_1,6,'b');
+plot_faces(finalposint_1, finalndir_1,Nf_1,6,'b');
 
 [finalposint_2, finalndir_2, finalori_2,Nf_2] = build_faces(xc_2, size(xc_2,1));
 
-plot_faces(finalposint_2, finalndir_2, finalori_2,Nf_2,7,'r');
+plot_faces(finalposint_2, finalndir_2,Nf_2,7,'r');
 
