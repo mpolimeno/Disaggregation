@@ -1,4 +1,4 @@
-function y = plot_faces(finalposint, finalndir,Nf,fignum,col)
+function plot_faces(finalposint, finalndir,Nf,fignum,col)
 % finalposint is the position of the center of each faces
 % finalndir is the index of the coordinate normal to the faces
 % finalori is useless
@@ -30,9 +30,13 @@ for i=1:Nf
     
     patch(xs,ys,zs,col)
 end
+xlabel("x")
+ylabel("y")
+zlabel("z")
 
 axis equal
-
-y=0;
+az = 121;
+el = 31;
+view(az,el)
 
 end
