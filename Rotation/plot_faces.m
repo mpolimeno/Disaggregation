@@ -30,10 +30,10 @@ for i=1:Nf
     
     patch(xs,ys,zs,col)
 end
-xlabel("x")
-ylabel("y")
-zlabel("z")
-
+xlabel('x',"Interpreter","LaTex")
+ylabel('y',"Interpreter","LaTex")
+zlabel('z',"Interpreter","LaTex")
+set(gca,"FontSize",25)
 axis equal
 az = 121;
 el = 31;
