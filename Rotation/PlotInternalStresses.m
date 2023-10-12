@@ -9,21 +9,26 @@ function PlotInternalStresses(figure_number,...
      This function plots the internal stresses for a fractal aggregate made
      of a given number of cubes.
      Inputs:
-        center_of_cubes {array}: the coordinates of the center (x,y,z) of
-        each cube in the given aggregate;
-        internal_and_external_stresses {array}: values of the stresses computed on all
-        the faces;
+        figure_number {int}: User-input figure number
+        center_of_external_faces {array}: the coordinates of the center (x,y,z) of
+        each external face in the given aggregate;
+        finalndir {array}: direction of normal vector in each external face
+        input_array {array}: contains indices of internal faces, their cubes, 
+                             their associated direction and their associated stress 
     %}
 
     figure(figure_number)
     clf
-    xlabel("x")
-    ylabel("y")
-    zlabel("z")
+    xlabel('x',"Interpreter","LaTex")
+    ylabel('y',"Interpreter","LaTex")
+    zlabel('z',"Interpreter","LaTex")
+    set(gca,"FontSize",25)
     
-    % colorbar
-    c = parula(size(stress_and_faces,1));
-    my_colormap = [c stress_and_faces(:,2)];
+    % add path to colormap
+    addpath(genpath('../matplotlib'));
+    c = colormap(flipud(viridis(size(stress_and_faces,1))));
+    my_colormap = ([c stress_and_faces(:,2)]);
+    colorbar
 
     center_of_internal_faces = input_array(:,1:3);
     finalndir_internal = input_array(:,4);
@@ -31,6 +36,7 @@ function PlotInternalStresses(figure_number,...
     total_number_of_external_faces = size(center_of_external_faces,1);
     total_number_of_internal_faces = size(center_of_internal_faces,1);
     % let us take care of the external faces first
+    % they will all be transparent
     for external=1:total_number_of_external_faces
         if (finalndir(external) == 1)
             x_vertices_of_face_s = [center_of_external_faces(external,1) center_of_external_faces(external,1) center_of_external_faces(external,1) center_of_external_faces(external,1) ];
@@ -91,5 +97,4 @@ function PlotInternalStresses(figure_number,...
     az = 121;
     el = 31;
     view(az,el)
-    colorbar
 end
