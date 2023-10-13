@@ -3,20 +3,35 @@ close all
 clear
 clc
 
-method = 1;
-if method==1
+% impose flow
+% flow = 1 -> Translation
+% flow = 2 -> Rotation
+% flow = 3 -> Extension
+% flow = 4 -> Shear
+flow = 4;
+
+method = 3;
+if method==1 % IAA routine
     SEED = 1;
-    number_of_cubes_in_aggregate = 10;
+    number_of_cubes_in_aggregate = 50;
     center_of_cubes_in_aggregate = DLA_3D(number_of_cubes_in_aggregate,SEED);
-elseif method==2
+elseif method==2 % Build dumbell whose bar lies on y-axis: useful to test rotational flow around vertical
     number_of_cubes_in_aggregate_dumb = 4;
     number_of_cubes_in_aggregate_bell = 54;
     pos_dumb = build_dumb(number_of_cubes_in_aggregate_dumb,1);
     [pos_bell_l,pos_bell_r] = build_bell(number_of_cubes_in_aggregate_bell,1);
     center_of_cubes_in_aggregate = [pos_bell_l;pos_dumb;pos_bell_r];
     number_of_cubes_in_aggregate = size(center_of_cubes_in_aggregate,1);
+elseif method==3 % build a vertical bar: useful for shear case u=gamma*y*i_hat
+    center_of_cubes_in_aggregate = [0,0,0;...
+                                    0,0,2;...
+                                    0,0,-2;...
+                                    0,0,-4;...
+                                    0,0,4;...
+                                    0,0,-6];
+    number_of_cubes_in_aggregate = size(center_of_cubes_in_aggregate,1);
 else
-    msg = "'method' needs to be either 1 or 2";
+    msg = "'method' needs to be either 1, 2 or 3";
     error(msg);
 end
 
@@ -37,43 +52,43 @@ plot_faces(center_of_external_faces,...
            normal_direction_of_each_external_face,...
            number_of_external_faces,1,[0 0.4470 0.7410]);
 
-% impose flow
-flow = 2;
-if flow==3
-   M = [-1,0,0;0,1,0;0,0,0];
-   u_infty = [0;0;0];
-   drag_in = [0;0;0];
-   torque_in = [0;0;0];
-elseif flow==4
-   M = [0,1,0;1,0,0;0,0,0];
-   u_infty = 0.5*[0;0;-1];
-   drag_in = [0;0;0];
-   torque_in = [0;0;0];
-elseif flow==1
-    M = [];
-    u_infty = [0;0;0];
-    Uvec = [0;0;1];
+if flow==1
+    extensional_matrix     = [];
+    velocity_vector_input  = [0;0;0];
+    translational_velocity = [0;0;1];
     [forceout,drag,torque] = fractal_bi_stokes_force(center_of_cubes_in_aggregate,...
                                                      center_of_external_faces,...
                                                      normal_direction_of_each_external_face,...
                                                      orientation_of_each_external_face,...
-                                                     Uvec,...
+                                                     translational_velocity,...
                                                      number_of_external_faces);
-    drag_in = drag;
-    torque_in = [0;0;0];    
+    drag_imposed   = drag;
+    torque_imposed = [0;0;0];
 elseif flow==2
-    M = [];
-    Uvec = [0;0;1];
-    Rot = Uvec;
-    u_infty = [0;0;0];
+    extensional_matrix     = [];
+    rotational_velocity    = [0;0;1];
+    velocity_vector_input  = [0;0;0];
     [forceout,drag,torque] = fractal_bi_stokes_force_rot(center_of_cubes_in_aggregate,...
                                                          center_of_external_faces,...
                                                          normal_direction_of_each_external_face,...
                                                          orientation_of_each_external_face,...
-                                                         Rot,...
+                                                         rotational_velocity,...
                                                          number_of_external_faces);
-    drag_in = [0;0;0];
-    torque_in = torque;
+    drag_imposed = [0;0;0];
+    torque_imposed = torque;
+elseif flow==3
+   extensional_matrix    = [-1,0,0;0,1,0;0,0,0];
+   velocity_vector_input = [0;0;0];
+   drag_imposed          = [0;0;0];
+   torque_imposed        = [0;0;0];
+elseif flow==4
+   % this shear flow is u = gamma*y*i_hat
+   shear_rate            = 5000; % gamma_t in the notes
+   extensional_matrix    = 0.5*[0,shear_rate,0;shear_rate,0,0;0,0,0];
+   k_hat                 = [0;0;1];
+   velocity_vector_input = -0.5*shear_rate*k_hat; % this is the omega for strain
+   drag_imposed          = [0;0;0];
+   torque_imposed        = [0;0;0];
 end
 
 internal_faces = FindInternalFaces(center_of_cubes_in_aggregate,number_of_cubes_in_aggregate);
@@ -85,18 +100,18 @@ center_of_cubes_in_aggregate_shift = center_of_cubes_in_aggregate - center_of_ma
                                                                                 center_of_external_faces_shift,...
                                                                                 normal_direction_of_each_external_face,...
                                                                                 orientation_of_each_external_face,...
-                                                                                drag_in,...
-                                                                                torque_in,...
+                                                                                drag_imposed,...
+                                                                                torque_imposed,...
                                                                                 number_of_external_faces,...
-                                                                                u_infty,...
-                                                                                M,...
+                                                                                velocity_vector_input,...
+                                                                                extensional_matrix,...
                                                                                 flow);
 % shift back for appropriate count of internal faces
 % the space location is not needed to compute these stresses
 % we just neeed to know the index of the internal faces
 
 % get the force acting on each cube
-force_cube = ComputeForceActingOnCube(center_of_cubes_in_aggregate,drag_in,flow);
+force_cube = ComputeForceActingOnCube(center_of_cubes_in_aggregate,drag_imposed,flow);
 faces_of_base_cube = center_of_faces(1:6,:);
 [internal_and_external_stresses,...
     internal_stresses,...
