@@ -10,10 +10,10 @@ clc
 % flow = 4 -> Shear
 flow = 4;
 
-method = 3;
+method = 1;
 if method==1 % IAA routine
     SEED = 1;
-    number_of_cubes_in_aggregate = 50;
+    number_of_cubes_in_aggregate = 200;
     center_of_cubes_in_aggregate = DLA_3D(number_of_cubes_in_aggregate,SEED);
 elseif method==2 % Build dumbell whose bar lies on y-axis: useful to test rotational flow around vertical
     number_of_cubes_in_aggregate_dumb = 4;
@@ -83,7 +83,7 @@ elseif flow==3
    torque_imposed        = [0;0;0];
 elseif flow==4
    % this shear flow is u = gamma*y*i_hat
-   shear_rate            = 5000; % gamma_t in the notes
+   shear_rate            = 1; % gamma_t in the notes
    extensional_matrix    = 0.5*[0,shear_rate,0;shear_rate,0,0;0,0,0];
    k_hat                 = [0;0;1];
    velocity_vector_input = -0.5*shear_rate*k_hat; % this is the omega for strain
@@ -121,7 +121,11 @@ faces_of_base_cube = center_of_faces(1:6,:);
                                                              stress_outer,...
                                                              force_cube,...
                                                              faces_of_base_cube);
-    
+
+                                                        
+                                                         
+
+                                                        
 norm_of_internal_stresses = zeros(size(internal_stresses,2),1);
 for stress=1:size(internal_stresses,2)
     norm_of_internal_stresses(stress) = norm(internal_stresses(:,stress));
@@ -174,6 +178,17 @@ plot_faces(center_of_external_faces_1, normal_direction_of_each_external_face_1,
 % Plot the external faces of aggregate 2
 plot_faces(center_of_external_faces_2, normal_direction_of_each_external_face_2,number_of_external_faces_2,4,[0.4660 0.6740 0.1880]);
 
+% Will have to move it to top and make it more modular
+% Trying to get a hang of the streamlines
+L_x = max(abs(center_of_external_faces(:,1)));
+L_y = max(abs(center_of_external_faces(:,2)));
+L_z = max(abs(center_of_external_faces(:,3)));
+[X,Y,Z] = meshgrid(-L_x:L_x,-L_y:L_y,-L_z:L_z);
+%[start_x,start_y,start_z] = meshgrid(-5:5,-5:5,-5:5);
+U = shear_rate*Y;   % this should be it as u=gamma*y*i_hat
+V = zeros(size(Y)); % 0
+W = zeros(size(Y)); % 0
+
 % plot the maximum stress only
 PlotMaximumInternalStress(5,...
                           center_of_external_faces,...
@@ -181,3 +196,11 @@ PlotMaximumInternalStress(5,...
                           stress_and_faces,...
                           input_array,...
                           face_detached)
+hold on
+quiver3(X,Y,Z,U,V,W)
+% verts = stream3(X,Y,Z,U,V,W,start_x,start_y,start_z);
+% lineobj = streamline(verts);
+view(3)
+xlim([-L_x,L_x])
+ylim([-L_y,L_y])
+zlim([-L_z,L_z])
