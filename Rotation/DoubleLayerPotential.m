@@ -52,12 +52,7 @@ function DL = DoubleLayerPotential(ai,bj,myposint,myndir,myori,pos0,u_infty,M,fl
             den = norm((Qt*gammaij+shift')-x0')^5;
 
             % evaluate integrand
-            if norm((Qt*gammaij+shift')-x0')<1e-3
-                disp("BOOM") % we blow up
-                Integrand = [0,0,0]; % at the singularity
-            else
-                Integrand = num/den; % elsewhere
-            end
+            Integrand = num/den;
 
             % Riemann sum
             Intg_ij = Intg_ij + Integrand;
